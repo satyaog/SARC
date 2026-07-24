@@ -278,16 +278,23 @@ class UnderusageNotifyConfig:
     underusage_report_template: str
     """``.format()``-able template for the per-user underusage DM body (see
     ``build_user_dm`` in sarc/notifications/messages.py). Placeholders:
-    ``{name}``, ``{window_weeks}``, ``{avg_utilization}``,
-    ``{rgu_hours_wasted}``, ``{jobs_section}``. Normally sourced from a file,
-    e.g. config/usage_notify/underusage_report_template.md."""
+    ``{name}``, ``{window_weeks}``, ``{window_range}``, ``{avg_utilization}``,
+    ``{rgu_hours_allocated}``, ``{rgu_hours_wasted}``, ``{jobs_section}``,
+    ``{dashboard_url}``, ``{resources_section}``, ``{help_section}`` (the last
+    two render as "" when unset — see ``_optional_block``)."""
 
     usage_report_template: str
     """``.format()``-able template for the neutral usage report body (see
     ``build_usage_report`` in sarc/notifications/messages.py). Placeholders:
-    ``{name}``, ``{window_weeks}``, ``{avg_utilization}``,
-    ``{rgu_hours_used}``, ``{jobs_section}``. Normally sourced from a file,
-    e.g. config/usage_notify/usage_report_template.md."""
+    ``{name}``, ``{window_weeks}``, ``{window_range}``, ``{avg_utilization}``,
+    ``{trend}``, ``{rgu_hours_allocated}``, ``{jobs_section}``,
+    ``{top_jobs_count}``, ``{dashboard_url}``, ``{resources_section}``,
+    ``{help_section}`` (the last two render as "" when unset — see
+    ``_optional_block``)."""
+
+    dashboard_url: str
+    """Link to the usage dashboard, rendered directly into both templates' body
+    text (referenced as ``{dashboard_url}``)."""
 
     enabled: bool = True
     """Master switch; when False the notify command is a no-op regardless of the
@@ -313,6 +320,24 @@ class UnderusageNotifyConfig:
     """Minimum scaled wasted RGU-hours for a user to be flagged; an activity
     floor that suppresses trivially small waste. Default ≈ 4× A100-80GB RGU ×
     7d."""
+
+    top_jobs_per_user: int = 5
+    """Number of a user's worst jobs shown per user in the underusage DM.
+    Positive int."""
+
+    trend_baseline_cycles: int = 2
+    """Number of usage-report cycles immediately preceding the current one
+    that are averaged to form the trend baseline shown in the usage report
+    (current cycle's avg usage % vs. that mean). Positive int."""
+
+    usage_report_cycles: int = 2
+    """Length of the usage-report window in usage cycles (window =
+    usage_report_cycles × usage_cycle_length_weeks). Positive int."""
+
+    usage_report_min_usage_rgu_hours: float = 1843.2  # 4x A100-80GB RGU x4d
+    """Minimum occupied (used+wasted) RGU-h for a user to be included in the
+    usage report; filters out negligible usage. Default ≈ 4× A100-80GB RGU ×
+    4d."""
 
     digest_top_n: int = 16
     """Number of top wasters listed in the admin digest ranking. Positive
@@ -347,33 +372,6 @@ class UnderusageNotifyConfig:
     historical_months: int = 6
     """Number of calendar months included in the digest's historical trend
     section. Positive int."""
-
-    usage_report_cycles: int = 2
-    """Length of the usage-report window in usage cycles (window =
-    usage_report_cycles × usage_cycle_length_weeks). Positive int."""
-
-    usage_report_min_usage_rgu_hours: float = 1843.2  # 4x A100-80GB RGU x4d
-    """Minimum occupied (used+wasted) RGU-h for a user to be included in the
-    usage report; filters out negligible usage. Default ≈ 4× A100-80GB RGU ×
-    4d."""
-
-    top_jobs_per_user: int = 5
-    """Number of a user's worst jobs shown per user (in DMs and the usage
-    report). Positive int."""
-
-    dashboard_url: str | None = None
-    """Link inserted into user-facing messages pointing at the usage dashboard;
-    omitted from messages if None."""
-
-    resources_section: str | None = None
-    """Markdown/plain text appended to the footer of both underusage DMs and
-    usage reports (unlike ``help_section`` below, which is underusage-DM-only);
-    omitted from messages if None. Normally sourced from a file, e.g.
-    config/usage_notify/resources_section.md."""
-
-    help_section: str | None = None
-    """Markdown text appended at the end of underusage DMs only (support links,
-    hours, etc.); usage reports intentionally omit it."""
 
     clusters: list[str] = field(default_factory=lambda: ["mila"])
     """Cluster-name allowlist scoping every query (alerts, usage report,
