@@ -16,7 +16,7 @@ from sqlmodel import select
 from sarc.db.cluster import SlurmClusterDB
 from sarc.db.support import GpuRguDB
 from sarc.db.users import UserDB
-from sarc.notifications.underusage import (
+from sarc.notifications.usage import (
     _select_user_jobs,
     get_all_users_usage,
     get_underusers,
@@ -382,6 +382,20 @@ def test_get_all_users_usage_user_emails_none_returns_all(underusage_db):
         "beaubonhomme@mila.quebec",
         "bramin@mila.quebec",
     }
+
+
+def test_get_all_users_usage_exclusion_only_list_does_not_match_nobody(underusage_db):
+    """user_emails=["~x"] (exclusion-only, no allow-list entries) must not be
+    treated the same as an explicit empty allow-list — it should return every
+    other user, only excluding x."""
+    results = get_all_users_usage(
+        _WINDOW_START,
+        _WINDOW_END,
+        top_jobs_per_user=_TOP_JOBS_PER_USER,
+        user_emails=["~petitbonhomme@mila.quebec"],
+    )
+    emails = {r.email for r in results}
+    assert emails == {"beaubonhomme@mila.quebec", "bramin@mila.quebec"}
 
 
 # ── Scaled waste + true_* reference fields ────────────────────────────────────

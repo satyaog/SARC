@@ -2,13 +2,13 @@ from dataclasses import dataclass
 
 from simple_parsing import subparsers
 
-from .underusage import UnderusageNotifyCommand
+from .usage import UsageNotifyCommand
 
 
 @dataclass
 class Notify:
-    command: UnderusageNotifyCommand = subparsers(
-        {"underusage": UnderusageNotifyCommand}  # ty:ignore[invalid-argument-type]
+    command: UsageNotifyCommand = subparsers(
+        {"usage": UsageNotifyCommand}  # ty:ignore[invalid-argument-type]
     )
 
     def execute(self) -> int:
