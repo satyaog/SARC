@@ -89,7 +89,7 @@ sarc:
       token: slack-token-replace-me # SENSITIVE: can be used to send messages on slack
       channel: slack-channel-id-replace-me # The slack channel ID to message
   notifications:
-    # Required bot scopes: chat:write, im:write, users:read.email
+    # Required bot scopes: chat:write, im:write, users:read.email, files:write
     slack_underusage: # Credentials for delivering user DMs and the admin digest
       description: Under Usage Reports # used to distinguish multiple instances if the message the same channel
       token: slack-token-replace-me # SENSITIVE: can be used to send messages on slack
@@ -125,6 +125,7 @@ sarc:
     recurrence_cluster_share: 0.50 # Cluster waste fraction at which per-cluster selection stops
     recurrence_active_cycles: 3 # Recent cycles counting toward personalized-action + recurrence window
     recurrence_display_cycles: 5 # Per-cycle columns shown in the recurring-users table
+    csv_recurrence_cycles: 12 # Per-cycle columns in the recurring-underusers CSV exports (wider than recurrence_display_cycles)
     personalized_action_min_waste_rgu_hours: 96768 # Summed scaled wasted RGU-h over active cycles to flag for action
 
     resources_section: "" # Text appended to the footer of both underusage DMs and usage reports.

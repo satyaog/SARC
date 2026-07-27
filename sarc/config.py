@@ -362,6 +362,12 @@ class UsageNotifyConfig:
     """Number of per-cycle columns shown in the recurring-users table. Positive
     int."""
 
+    csv_recurrence_cycles: int = 12
+    """Number of per-cycle columns in the recurring-underusers CSV exports
+    attached to the admin digest — wider than ``recurrence_display_cycles``,
+    which only sizes the Slack-rendered table. Positive int, ≥
+    recurrence_display_cycles."""
+
     personalized_action_min_waste_rgu_hours: float = 16128.0  # 20x A100-80GB RGU x 7d
     """Threshold on a user's summed scaled wasted RGU-h across allowlisted
     clusters over the last ``recurrence_active_cycles`` cycles; at or above it
